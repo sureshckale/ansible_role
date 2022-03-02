@@ -1,0 +1,74 @@
+# Get the new APT keys first 
+- name: add docker apt keys
+  apt_key:
+    url: "{{ artifactory_base_repo }}/docker-ce-deb/ubuntu/gpg"
+    state: present
+
+# docker_bin_volume -> binary_dir
+- name: ensure bin volume exists
+  file:
+    path: "{{ binary_dir }}"
+    state: directory
+
+# clone the repo next 
+- name: add artifactory docker repo
+  apt_repository:
+    repo: "deb [arch=amd64 ] {{ artifactory_base_repo }}/docker-ce-deb/ubuntu focal stabale "
+    filename: docker-ce-deb
+    state: present
+
+- neme: install docker packages
+  apt: 
+    name: "{{ packages }}"
+    update_cache: yes
+    state: present
+  vars:
+    packages:
+      - docker-ce-={{ docker_version }}
+
+-name: setup docker demon.json to enable namespace isolation
+  template:
+  dest: /etc/docker/daemon.json
+  daemon_reload: yes
+  enabled: yes
+
+
+- name: Include Host Configuration
+  import_tasks: section_1.yml
+  when: section_1 | bool
+  tags:
+      - host_configuration
+      - section_1
+
+- name: Include Docker daemon configuration
+  import_tasks: section_2.yml
+  when: section_2 | bool
+  tags:
+      - docker_daemon_configuration
+      - section_2
+
+- name: Include Docker daemon configuration files
+  import_tasks: section_3.yml
+  when: section_3 | bool
+  tags:
+      - docker_daemon_configuration_files
+      - section_3
+
+- name: Include Container Images and Build File
+  import_tasks: section_4.yml
+  when: section_4 | bool
+  tags:
+      - container_images_and_build_file
+      - section_4
+
+- name: Include Container Runtime
+  import_tasks: section_5.yml
+  when: section_5 | bool
+  tags:
+      - container_runtime
+      - section_5
+- name: Daemon Reload
+  command: systemctl daemon-reload
+
+- name: Reload docker
+  command: systemctl restart docker.service

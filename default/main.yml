@@ -1,0 +1,46 @@
+---
+# defaults file for cis-docker-ce
+
+
+section_1: true
+
+section_2: false
+
+section_3: false
+
+section_4: false
+
+section_5: false
+
+tursted_users:
+  - nomad
+
+config_file: /etc/docker/daemon.json
+
+dockerd_via_network: true
+
+# Provide the following arguments if dockerd_via_network is true
+# Generate CA cert and CA Key and place it in the files directory
+
+dockerd_ip: 0.0.0.0
+dockerd_port: 2376
+
+ca_filename: "patient0.pem"
+key_file: "{{ cert_dir }}/{{ svc_name }}-{{ polaries_role }}-key.pem"
+cert_file: "{{ cert_dir }}/{{ svc_name }}-{{ polaries_role }}.pem"
+ca_file: "{{ cert_dir }}/{{ca_filename }}"
+
+client_cert_path: /etc/docker
+client_cert: cert.pem
+client_cert_key: key.pem
+
+default_ulimits_nofile_soft: 100
+default_ulimits_nofile_hard: 200
+default_ulimits_nproc_soft: 1024
+default_ulimits_nproc_hard: 2048
+
+syslog_address: ""
+seccomp_profile: ""
+authorization_plugins: []
+
+
